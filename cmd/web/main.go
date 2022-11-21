@@ -13,7 +13,7 @@ func main() {
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	infoErr := log.New(os.Stderr, "INFO\t", log.Ldate|log.Ltime|log.Lshortfile)
+	errorLog := log.New(os.Stderr, "INFO\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", home)
@@ -24,7 +24,13 @@ func main() {
 
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
+	srv := &http.Server{
+		Addr:     *addr,
+		ErrorLog: errorLog,
+		Handler:  mux,
+	}
+
 	infoLog.Printf("Server on %s", *addr)
-	err := http.ListenAndServe(*addr, mux)
-	infoErr.Fatal(err)
+	err := srv.ListenAndServe()
+	errorLog.Fatal(err)
 }
