@@ -4,12 +4,16 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 
 	addr := flag.String("addr", ":4000", "HTTP Network Address")
 	flag.Parse()
+
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	infoErr := log.New(os.Stderr, "INFO\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", home)
@@ -20,7 +24,7 @@ func main() {
 
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	log.Printf("Server on %s", *addr)
+	infoLog.Printf("Server on %s", *addr)
 	err := http.ListenAndServe(*addr, mux)
-	log.Fatal(err)
+	infoErr.Fatal(err)
 }
