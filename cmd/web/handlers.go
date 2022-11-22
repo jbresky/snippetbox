@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"html/template"
+	// "html/template"
 	"net/http"
 	"strconv"
 
@@ -15,25 +15,34 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"./ui/html/home.page.html",
-		"./ui/html/base.layout.html",
-		"./ui/html/footer.partial.html",
-	}
-
-	ts, err := template.ParseFiles(files...)
+	s, err := app.snippets.Latest()
 	if err != nil {
-		app.errorLog.Println(err.Error())
 		app.serverError(w, err)
 		return
 	}
-
-	err = ts.Execute(w, nil) // this last parameter represents dynamic data. for now it's just nil
-	if err != nil {
-		app.errorLog.Println(err.Error())
-		app.serverError(w, err)
-		return
+	for _, snippet := range s {
+		fmt.Fprintf(w, "%v\n", snippet)
 	}
+
+	// files := []string{
+	// 	"./ui/html/home.page.html",
+	// 	"./ui/html/base.layout.html",
+	// 	"./ui/html/footer.partial.html",
+	// }
+
+	// ts, err := template.ParseFiles(files...)
+	// if err != nil {
+	// 	app.errorLog.Println(err.Error())
+	// 	app.serverError(w, err)
+	// 	return
+	// }
+
+	// err = ts.Execute(w, nil) // this last parameter represents dynamic data. for now it's just nil
+	// if err != nil {
+	// 	app.errorLog.Println(err.Error())
+	// 	app.serverError(w, err)
+	// 	return
+	// }
 }
 
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
