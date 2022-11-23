@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	// "html/template"
+	"html/template"
 	"net/http"
 	"strconv"
 
@@ -24,25 +24,25 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%v\n", snippet)
 	}
 
-	// files := []string{
-	// 	"./ui/html/home.page.html",
-	// 	"./ui/html/base.layout.html",
-	// 	"./ui/html/footer.partial.html",
-	// }
+	files := []string{
+		"./ui/html/show.page.html",
+		"./ui/html/base.layout.html",
+		"./ui/html/footer.partial.html",
+	}
 
-	// ts, err := template.ParseFiles(files...)
-	// if err != nil {
-	// 	app.errorLog.Println(err.Error())
-	// 	app.serverError(w, err)
-	// 	return
-	// }
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.errorLog.Println(err.Error())
+		app.serverError(w, err)
+		return
+	}
 
-	// err = ts.Execute(w, nil) // this last parameter represents dynamic data. for now it's just nil
-	// if err != nil {
-	// 	app.errorLog.Println(err.Error())
-	// 	app.serverError(w, err)
-	// 	return
-	// }
+	err = ts.Execute(w, nil) // this last parameter represents dynamic data. for now it's just nil
+	if err != nil {
+		app.errorLog.Println(err.Error())
+		app.serverError(w, err)
+		return
+	}
 }
 
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
@@ -51,6 +51,7 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		app.notFound(w)
 		return
 	}
+
 	s, err := app.snippets.Get(id)
 	if err == models.ErrNoRecord {
 		app.notFound(w)
@@ -58,6 +59,27 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	} else if err != nil {
 		app.serverError(w, err)
 		return
+	}
+
+	data := &templateData{Snippet: s}
+
+	files := []string{
+		"./ui/html/show.page.html",
+		"./ui/html/base.layout.html",
+		"./ui/html/footer.partial.html",
+	}
+
+	ts, err := template.ParseFiles(files...)
+
+	if err != nil {
+		app.errorLog.Println(err.Error())
+		app.serverError(w, err)
+		return
+	}
+
+	err = ts.Execute(w, data)
+	if err != nil {
+		app.serverError(w, err)
 	}
 
 	fmt.Fprintf(w, "%v", s)
